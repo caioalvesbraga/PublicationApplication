@@ -1,13 +1,8 @@
 package libraryProject.restApi.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class PublicationResponseDto {
-    private Long id;
-    private String title;
-}
+public record PublicationResponseDto (Long id,
+                                      String title,
+                                      String author,
+                                      Long isbn,
+                                      Integer pagesQuantity,
+                                      Integer launchYear) {}

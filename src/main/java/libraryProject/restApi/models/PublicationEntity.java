@@ -9,12 +9,24 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tb_publications")
+@Table(name = "publication")
 public class PublicationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "publication_title")
+    @Column
     private String title;
+
+    @Column
+    private String author;
+
+    @Column
+    private Long isbn;
+
+    @Column
+    private Integer pagesQuantity;
+
+    @Column
+    private Integer launchYear;
 }

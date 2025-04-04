@@ -1,58 +1,82 @@
 package libraryProject.restApi.controllers;
 
-import libraryProject.restApi.dto.PublicationDto;
+import jakarta.validation.Valid;
+import libraryProject.restApi.dto.PublicationRequestDto;
 import libraryProject.restApi.dto.PublicationResponseDto;
+import libraryProject.restApi.dto.PublicationResponsePaginationDto;
 import libraryProject.restApi.services.PublicationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/publications")
 public class PublicationController {
-    @Autowired
-    private PublicationService publicationService;
+    private final PublicationService publicationService;
 
     @GetMapping
-    public ResponseEntity<List<PublicationResponseDto>> getPublication() {
-        try {
-            return ResponseEntity.ok(publicationService.getPublications());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<PublicationResponsePaginationDto> getPublications(
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer publicationsPerPage) {
+        return ResponseEntity.ok(publicationService.getPublications(title, pageNumber, publicationsPerPage));
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<PublicationResponseDto> getPublicationsById(@RequestParam(required = false) Long id) {
+        return ResponseEntity.ok(publicationService.getPublicationsById(id));
+    }
+
+    @GetMapping("/author")
+    public ResponseEntity<PublicationResponsePaginationDto> getPublicationsByAuthor(
+            @RequestParam(required = false) String author,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer publicationsPerPage) {
+        return ResponseEntity.ok(publicationService.getPublicationsByAuthor(author, pageNumber, publicationsPerPage));
+    }
+
+    @GetMapping("/isbn")
+    public ResponseEntity<PublicationResponsePaginationDto> getPublicationsByIsbn(
+            @RequestParam Long isbn,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer publicationsPerPage) {
+        return ResponseEntity.ok(publicationService.getPublicationsByIsbn(isbn, pageNumber, publicationsPerPage));
     }
 
     @PostMapping
-    public ResponseEntity<PublicationDto> addPublication(@RequestBody PublicationDto publicationDto) {
-        try {
-            return ResponseEntity.ok(publicationService.addPublication(publicationDto));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<PublicationResponseDto> addPublication(@Valid @RequestBody PublicationRequestDto publicationRequestDto) {
+        return new ResponseEntity<>(publicationService.addPublication(publicationRequestDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PublicationDto> updatePublication(@PathVariable Long id, @RequestBody PublicationDto publicationDto) {
-        try {
-            return ResponseEntity.ok(publicationService.updatePublication(id, publicationDto));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<PublicationResponseDto> updatePublication(@Valid @PathVariable Long id,
+                                                                    @Valid @RequestBody PublicationRequestDto publicationRequestDto) {
+        return ResponseEntity.ok(publicationService.updatePublication(id, publicationRequestDto));
     }
 
     @DeleteMapping("/{id}")
-    public void deletePublication(@PathVariable Long id) {
-        try {
-            publicationService.deletePublication(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePublication(@Valid @PathVariable Long id) {
+        publicationService.deletePublication(id);
+    }
+
+    @PostMapping("/import")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void importPublications() {
+        publicationService.publicationImportAll();
+    }
+
+    @PostMapping("/import/author")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void importPublicationsByAuthor(@RequestParam String author) {
+        publicationService.publicationImportByAuthor(author);
+    }
+
+    @PostMapping("/import/isbn")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void importPublicationsByAuthor(@RequestParam Long isbn) {
+        publicationService.publicationImportByIsbn(isbn);
     }
 }

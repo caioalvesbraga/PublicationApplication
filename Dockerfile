@@ -1,12 +1,10 @@
-FROM maven:3.9.6-eclipse-temurin-21 as builder
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+COPY pom.xml /app/pom.xml
+COPY src /app/src
 WORKDIR /app
-COPY . .
 RUN mvn clean package -DskipTests
 
-# Etapa 2: imagem final com apenas o jar
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
-COPY --from=builder /app/target/restApi-0.0.1-SNAPSHOT.jar app.jar
-
+FROM openjdk:21-jdk
+COPY --from=build /app/target/restApi-0.0.1-SNAPSHOT.jar /app/restApi.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/restApi.jar"]

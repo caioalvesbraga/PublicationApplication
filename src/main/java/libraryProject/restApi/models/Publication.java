@@ -10,4 +10,8 @@ import lombok.NoArgsConstructor;
 public class Publication {
     private Long id;
     private String title;
+    private String author;
+    private Integer isbn;
+    private Integer pagesQuantity;
+    private Integer launchYear;
 }
